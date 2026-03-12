@@ -22,18 +22,18 @@ export async function GET(request) {
   const schedules = await prisma.$queryRaw`
     SELECT
       s.id,
-      s.ferry_date,
-      s.ferry_time,
-      s.max_capacity,
+      s."ferryDate"    AS ferry_date,
+      s."ferryTime"    AS ferry_time,
+      s."maxCapacity"  AS max_capacity,
       s.status,
-      s.created_at,
+      s."createdAt"    AS created_at,
       COUNT(a.id)::int AS assignment_count
     FROM "Schedule" s
-    LEFT JOIN "Assignment" a ON a.schedule_id = s.id
-    WHERE s.status = ANY(${statusList}::text[])
-      AND s.ferry_date BETWEEN ${start} AND ${end}
+    LEFT JOIN "Assignment" a ON a."scheduleId" = s.id
+    WHERE s.status::text = ANY(${statusList}::text[])
+      AND s."ferryDate" BETWEEN ${start} AND ${end}
     GROUP BY s.id
-    ORDER BY s.ferry_date ASC, s.ferry_time ASC
+    ORDER BY s."ferryDate" ASC, s."ferryTime" ASC
   `
 
   return NextResponse.json(schedules)

@@ -13,17 +13,17 @@ export async function GET(request, { params }) {
   const assignments = await prisma.$queryRaw`
     SELECT
       a.id             AS assignment_id,
-      a.assigned_at,
+      a."assignedAt"   AS assigned_at,
       c.id             AS customer_id,
-      c.full_name      AS customer_name,
+      c."fullName"     AS customer_name,
       c.contact        AS customer_contact,
       u.id             AS assigned_by_id,
       u.name           AS assigned_by_name
     FROM "Assignment" a
-    INNER JOIN "Customer" c ON c.id = a.customer_id
-    INNER JOIN "User" u ON u.id = a.assigned_by_id
-    WHERE a.schedule_id = ${id}
-    ORDER BY a.assigned_at ASC
+    INNER JOIN "Customer" c ON c.id = a."customerId"
+    INNER JOIN "User" u ON u.id = a."assignedById"
+    WHERE a."scheduleId" = ${id}
+    ORDER BY a."assignedAt" ASC
   `
 
   const schedule = await prisma.schedule.findUnique({

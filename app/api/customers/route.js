@@ -14,16 +14,16 @@ export async function GET(request) {
   const customers = await prisma.$queryRaw`
     SELECT DISTINCT ON (c.id)
       c.id,
-      c.full_name,
+      c."fullName",
       c.contact,
-      c.created_at,
+      c."createdAt",
       u.name AS created_by_name
     FROM "Customer" c
-    INNER JOIN "User" u ON u.id = c.created_by_id
+    INNER JOIN "User" u ON u.id = c."createdById"
     WHERE
-      (${search} = '' OR c.full_name ILIKE ${'%' + search + '%'})
+      (${search} = '' OR c."fullName" ILIKE ${'%' + search + '%'})
       AND (${noContact}::boolean = false OR c.contact IS NULL)
-    ORDER BY c.id, c.full_name ASC
+    ORDER BY c.id, c."fullName" ASC
   `
 
   return NextResponse.json(customers)
