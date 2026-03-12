@@ -6,8 +6,75 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  ADMIN
+  REGISTER
+  CLIENT
+}
+
+enum ScheduleStatus {
+  OPEN
+  FULL
+  CANCELLED
+}
+
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
+  id            Int        @id @default(autoincrement())
+  name          String
+  email         String     @unique
+  passwordHash  String
+  role          UserRole
+  createdAt     DateTime   @default(now())
+
+  customersCreated Customer[]   @relation("CustomerCreator")
+  assignmentsMade  Assignment[] @relation("AssignmentCreator")
+
+  @@index([role])
+}
+
+model Schedule {
+  id            Int            @id @default(autoincrement())
+  ferryDate     DateTime
+  ferryTime     String
+  maxCapacity   Int
+  status        ScheduleStatus @default(OPEN)
+  createdAt     DateTime       @default(now())
+
+  assignments   Assignment[]
+
+  @@index([ferryDate])
+  @@index([ferryTime])
+  @@index([status])
+}
+
+model Customer {
+  id          Int        @id @default(autoincrement())
+  fullName    String
+  contact     String?
+  createdAt   DateTime   @default(now())
+
+  createdById Int
+  createdBy   User       @relation("CustomerCreator", fields: [createdById], references: [id])
+
+  assignments Assignment[]
+
+  @@index([fullName])
+}
+
+model Assignment {
+  id            Int       @id @default(autoincrement())
+
+  customerId    Int
+  scheduleId    Int
+  assignedById  Int
+  assignedAt    DateTime  @default(now())
+
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  schedule      Schedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  assignedBy    User      @relation("AssignmentCreator", fields: [assignedById], references: [id])
+
+  @@unique([customerId, scheduleId])
+  @@index([scheduleId])
+  @@index([customerId])
+  @@index([assignedAt])
 }
